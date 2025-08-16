@@ -4,7 +4,7 @@ template<class T>
 T COMBINATIONS(T a, T b){
   T ret=1;
   for(T i=1;i<=b;++i){
-    ret*=a-i;
+    ret*=a+1-i;
     ret/=i;
   }
   return ret;

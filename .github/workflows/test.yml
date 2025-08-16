@@ -1,0 +1,94 @@
+name: Test AtCoder Template
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        compiler: [gcc, clang]
+        exclude:
+          - os: windows-latest
+            compiler: clang
+          - os: macos-latest
+            compiler: gcc
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup CMake
+      uses: jwlawson/actions-setup-cmake@v1.14
+      with:
+        cmake-version: '3.17'
+
+    - name: Setup C++ compiler
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        if [ "${{ matrix.compiler }}" = "gcc" ]; then
+          sudo apt-get update
+          sudo apt-get install -y g++-11
+          echo "CC=gcc-11" >> $GITHUB_ENV
+          echo "CXX=g++-11" >> $GITHUB_ENV
+        elif [ "${{ matrix.compiler }}" = "clang" ]; then
+          sudo apt-get update
+          sudo apt-get install -y clang-14
+          echo "CC=clang-14" >> $GITHUB_ENV
+          echo "CXX=clang++-14" >> $GITHUB_ENV
+        fi
+
+    - name: Setup C++ compiler (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        if [ "${{ matrix.compiler }}" = "clang" ]; then
+          echo "CC=clang" >> $GITHUB_ENV
+          echo "CXX=clang++" >> $GITHUB_ENV
+        fi
+
+    - name: Setup C++ compiler (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        echo "CC=cl" >> $GITHUB_ENV
+        echo "CXX=cl" >> $GITHUB_ENV
+
+    - name: Create build directory
+      run: mkdir build
+
+    - name: Configure CMake
+      run: |
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Release
+
+    - name: Build tests
+      run: |
+        cd build
+        cmake --build . --config Release --parallel
+
+    - name: Run tests
+      run: |
+        cd build
+        ./UtilityTest --gtest_output=xml:test-results.xml
+      timeout-minutes: 5
+
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-${{ matrix.os }}-${{ matrix.compiler }}
+        path: build/test-results.xml
+
+    - name: Test summary
+      if: always()
+      run: |
+        echo "## Test Results for ${{ matrix.os }} (${{ matrix.compiler }})" >> $GITHUB_STEP_SUMMARY
+        if [ -f build/test-results.xml ]; then
+          echo "✅ Tests completed successfully" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "❌ Tests failed or timed out" >> $GITHUB_STEP_SUMMARY
+        fi

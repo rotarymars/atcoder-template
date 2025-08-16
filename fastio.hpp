@@ -237,6 +237,11 @@ struct FastIO {
         writeVec(v);
     }
 
+    template<class T>
+    void write(std::vector<T> &&v) {
+        writeVec(v);
+    }
+
     template<class T, class U>
     void write(const std::pair<T, U> &p) {
         writePair(p);

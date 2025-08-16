@@ -300,6 +300,11 @@ struct FastIO {
         if(end)pc(end);
     }
 
+    template<class T>
+    void writeVec(std::vector<T> v, char end = '\0'){
+        writeVec(v,end);
+    }
+
     template<class T, class U>
     void writePair(const std::pair<T, U> &p, char end = '\0') {
         write(p.first);

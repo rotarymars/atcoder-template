@@ -225,6 +225,8 @@ struct FastIO {
 
   void write(const std::string &s) { writeString(s); }
 
+  void write(const std::string &&s) { writeString(s); }
+
   void write(const char *s) { writeString(s); }
 
   template <class T> void write(const std::vector<T> &v) { writeVec(v); }
@@ -312,8 +314,10 @@ struct FastIO {
       pc(end);
   }
 
-  template <typename... Args> void write(Args &&...args) {
-    (write(std::forward<Args>(args)), ...);
+  template <typename T, typename U, typename... Args>
+  void write(T &&first, U &&second, Args &&...rest) {
+    write(std::forward<T>(first));
+    write(std::forward<U>(second), std::forward<Args>(rest)...);
   }
 
   // Variadic read function

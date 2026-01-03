@@ -195,7 +195,13 @@ struct FastIO {
     return true;
   }
 
-  bool readChar(char &c) { return readCharRaw(c); }
+  bool readChar(char &c) {
+    int x;
+    if (!skipSpaces(x))
+      return false;
+    c = static_cast<char>(x);
+    return true;
+  }
 
   template <class T> bool readVec(std::vector<T> &v) {
     for (T &x : v) {

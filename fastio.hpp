@@ -326,6 +326,11 @@ struct FastIO {
     write(std::forward<U>(second), std::forward<Args>(rest)...);
   }
 
+  template <typename T, typename... Args>
+  void writeln(T &&first, Args &&...rest) {
+    write(std::forward<T>(first), std::forward<Args>(rest)..., '\n');
+  }
+
   // Variadic read function
   template <typename... Args> bool read(Args &...args) {
     return (... && read(args));
